@@ -25,8 +25,7 @@ class Fudan:
     # 初始化会话
     def __init__(self,
                  uid, psw,
-                 url_login='https://uis.fudan.edu.cn/authserver/login',
-                 url_code="https://zlapp.fudan.edu.cn/backend/default/code"):
+                 url_login='https://hesuan.shchildren.com.cn:28011/#/',):
         """
         初始化一个session，及登录信息
         :param uid: 学号
@@ -37,8 +36,6 @@ class Fudan:
         self.session.keep_alive = False
         self.session.headers['User-Agent'] = self.UA
         self.url_login = url_login
-        self.url_code = url_code
-
         self.uid = uid
         self.psw = psw
 
@@ -70,7 +67,7 @@ class Fudan:
         data = {
             "username": self.uid,
             "password": self.psw,
-            "service": "https://zlapp.fudan.edu.cn/site/ncov/fudanDaily"
+            "service": "https://hesuan.shchildren.com.cn:28011/#/"
         }
 
         # 获取登录页上的令牌
@@ -84,8 +81,8 @@ class Fudan:
         )
 
         headers = {
-            "Host": "uis.fudan.edu.cn",
-            "Origin": "https://uis.fudan.edu.cn",
+            "Host": "hesuan.shchildren.com.cn:28011",
+            "Origin": "https://hesuan.shchildren.com.cn:28011/#/",
             "Referer": self.url_login,
             "User-Agent": self.UA
         }
@@ -140,7 +137,7 @@ class Zlapp(Fudan):
         """
         print("◉检测是否已提交")
         get_info = self.session.get(
-            'https://zlapp.fudan.edu.cn/ncov/wap/fudan/get-info')
+            'https://hesuan.shchildren.com.cn:28011/#/checkIn?hospId=01')
         last_info = get_info.json()
 
         print("◉上一次提交日期为:", last_info["d"]["info"]["date"])
@@ -217,9 +214,6 @@ class Zlapp(Fudan):
             district = geo_api_info["addressComponent"].get("district", "")
         
         while(True):
-            print("◉正在识别验证码......")
-            code = self.validate_code()
-            print("◉验证码为:", code)
             if area == "其他国家":
                 self.last_info.update(
                     {
@@ -230,7 +224,6 @@ class Zlapp(Fudan):
                         "gwszdd": gwszdd,
                         #"sfzx": "1",  # 是否在校
                         #"fxyy": "",  # 返校原因
-                        "code": code,
                     }
                 )
             else:
@@ -242,7 +235,6 @@ class Zlapp(Fudan):
                         "area": " ".join((province, city, district)),
                         #"sfzx": "1",  # 是否在校
                         #"fxyy": "",  # 返校原因
-                        "code": code,
                     }
                 )
             # print(self.last_info)
@@ -294,11 +286,9 @@ def get_account():
 if __name__ == '__main__':
     uid, psw = get_account()
     # print(uid, psw)
-    zlapp_login = 'https://uis.fudan.edu.cn/authserver/login?' \
-                  'service=https://zlapp.fudan.edu.cn/site/ncov/fudanDaily'
-    code_url = "https://zlapp.fudan.edu.cn/backend/default/code"
+    zlapp_login = 'https://hesuan.shchildren.com.cn:28011/#/'
     daily_fudan = Zlapp(uid, psw,
-                        url_login=zlapp_login, url_code=code_url)
+                        url_login=zlapp_login)
     daily_fudan.login()
 
     daily_fudan.check()
